@@ -12,6 +12,7 @@
     }
     svg {
         border: 1px solid #cccccc;
+        background: #EEEEEE;
     }
     image {
         mask: url(#masking);
@@ -20,7 +21,7 @@
 </style>
 <body>
 
-    <svg width="960" height="500">
+    <svg width="960" height="600">
         <defs>
             <mask id="masking" maskUnits="objectBoundingBox" maskContentUnits="objectBoundingBox">
                 <circle cx=".5" cy=".5" r=".5" fill="white"></circle>
@@ -31,15 +32,16 @@
 <script>
 
     var width = 960,
-        height = 500;
+        height = 600,
+        r = 60;
 
     var svg = d3.select("svg")
             .attr("width", width)
             .attr("height", height);
 
     var force = d3.layout.force()
-            .gravity(.5)
-            .distance(function(d) { return d.value * 100; })
+            .gravity(.08)
+            .distance(function(d) { return d.value * 120; })
             .charge(-300)
             .size([width, height]);
 
@@ -64,10 +66,10 @@
 
         node.append("image")
                 .attr("xlink:href", function(d) { return d.image; })
-                .attr("x", -24)
-                .attr("y", -24)
-                .attr("width", 48)
-                .attr("height", 48);
+                .attr("x", -r/2)
+                .attr("y", -r/2)
+                .attr("width", r)
+                .attr("height", r);
 
         /*node.append("text")
                 .attr("dx", 30)
@@ -88,6 +90,39 @@
                 return "translate(" + d.x + "," + d.y + ")";
             });
         });
+
+        node
+            .on('mouseover', onNodeMouseOver)
+            .on('mouseout', onNodeMouseOut);
     });
+
+
+    /** Handles the event of mouse over on each node. */
+    function onNodeMouseOver() {
+        d3.select(this)
+            .select("image")
+                .transition()
+                .duration(200)
+                .attr("x", -(r + 10)/2)
+                .attr("y", -(r + 10)/2)
+                .attr("width", r + 10)
+                .attr("height", r + 10)
+                .transition().duration(1000).ease('elastic')
+                .attr("x", -(r + 5)/2)
+                .attr("y", -(r + 5)/2)
+                .attr("width", r + 5)
+                .attr("height", r + 5);
+    }
+
+    /** Handles the event of mouse out on each node */
+    function onNodeMouseOut() {
+        d3.select(this)
+            .select("image")
+                .transition().duration(200)
+                .attr("x", -r/2)
+                .attr("y", -r/2)
+                .attr("width", r)
+                .attr("height", r);
+    }
 
 </script>
