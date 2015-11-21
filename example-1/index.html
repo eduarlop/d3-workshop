@@ -2,75 +2,119 @@
 <meta charset="utf-8">
 <html>
     <head>
+        <style>
+            body {
+                font-family: Arial, Helvetica, sans-serif;
+            }
+            .domain {
+                fill: none;
+                stroke: #333;
+                stroke-width: 1;
+            }
+        </style>
         <script src="http://d3js.org/d3.v3.min.js"></script>
     </head>
     <body>
-        <h3>Fruits Consumed Per Season in 2012</h3>
-        <div id="visualization"></div>
+        <svg width="960" height="500"></svg>
         <script>
-            var fruitConsumption = [
-                {"season":"spring", "apple":1, "kiwi":4, "grape":1},
-                {"season":"summer", "apple":2, "kiwi":1, "grape":2},
-                {"season":"fall",   "apple":3, "kiwi":3, "grape":1},
-                {"season":"winter", "apple":2, "kiwi":2, "grape":2}];
 
+            // ======================
+            // Variables
+            // ======================
+
+            var svgWidth = 960,
+                svgHeight = 500,
+                margin = {top: 80, right: 30, bottom: 30, left: 30},
+                width = svgWidth - margin.left - margin.right,
+                height = svgHeight - margin.top - margin.bottom;
+
+            // ======================
+            // Dataset
+            // ======================
+
+            var fruitConsumption = [
+                {"season":"spring", "apple":4, "kiwi":2, "grape":2},
+                {"season":"summer", "apple":1, "kiwi":2, "grape":2},
+                {"season":"fall",   "apple":2, "kiwi":3, "grape":2},
+                {"season":"winter", "apple":2, "kiwi":3, "grape":4}];
+
+            // ["spring", "summer", "fall", "winter"]
             var seasonNames = fruitConsumption.map(function(d){return d.season;});
 
+            // ["apple", "kiwi", "grape"]
             var fruitNames = d3.keys(fruitConsumption[0])
-                .filter(function(key) { return key!== "season";});
+                .filter(function(key) { return key !== "season";});
 
+            // Set fruits consumed and the total of fruits per season
             fruitConsumption.forEach(function(d) {
+
+                // [{"consumedCount": 4, "fruitName": "apple"} ...]
                 d.fruitsConsumed = fruitNames.map(function(name) {
-                    return{
+                    return {
                         "fruitName": name,
                         "consumedCount": d[name]};
                 });
+
+                // Total = Apples + Kiwis + Grapes
                 d.totalFruit = d3.sum(d.fruitsConsumed, function(d) {
                     return d.consumedCount;
                 });
             });
 
-            var margin = {top: 80, right: 30, bottom: 30, left: 30},
-                width = 300 - margin.left - margin.right,
-                height = 300 - margin.top - margin.bottom;
+            // ======================
+            // Scales
+            // ======================
 
+            // X's Scale
             var x = d3.scale.ordinal()
                 .domain(seasonNames)
-                .rangeRoundBands([0,width],0.1);
+                .rangeRoundBands([0, width], 0.1);
 
+            // Y's Scale
             var y = d3.scale.linear()
-                .domain([0,d3.max(fruitConsumption, function(d) {
-                    return d.totalFruit;})])
+                .domain([0, d3.max(fruitConsumption, function(d) { return d.totalFruit; })])
                 .range([height, 0]);
 
+            // Colors for each fruit
             var color = d3.scale.ordinal()
                 .domain(fruitNames)
-                .range(["#d62728", "#2ca02c", "#9467bd"]);
+                .range(["#EF5350", "#9CCC65", "#7E57C2"]);
 
+            // ======================
+            // Axis
+            // ======================
+
+            // X's Axis
             var xAxis = d3.svg.axis()
                 .scale(x)
                 .orient("bottom");
 
+            // Y's Axis
             var yAxis = d3.svg.axis()
                 .scale(y)
                 .orient("left");
 
-            var svgViewport = d3.select("body")
-                .append("svg")
-                    .attr("width", width + margin.left + margin.right)
-                    .attr("height", height + margin.top + margin.bottom)
+            // ======================
+            // Layout
+            // ======================
+
+            // Generates a group where the to put the viz
+            var svgViewport = d3.select("svg")
                 .append("g")
                     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+            // Append the x axis
             svgViewport.append("g")
                 .attr("class", "x axis")
                 .attr("transform", "translate(0," + height + ")")
                 .call(xAxis);
 
+            // Append the y axis
             svgViewport.append("g")
                 .attr("class", "y axis")
                 .call(yAxis);
 
+            // Array of layers of each fruit
             var layers = fruitNames.map(function(fruitName) {
                 return fruitConsumption.map(function(d) {
                     return {
@@ -81,45 +125,58 @@
                 });
             });
 
+            // Generate the stack layout
             var stack = d3.layout.stack();
             stack(layers);
 
+            // ======================
+            // Bars
+            // ======================
+
+            // Make groups of each layer
             var svgLayer = svgViewport.selectAll(".layer")
                 .data(layers)
                 .enter()
                 .append("g")
                     .attr("class", "layer");
 
+            // Draw the rectangles with height 0
             var rect = svgLayer.selectAll("rect")
-                .data(function(d){return d;})
+                .data(function(d) { return d;})
                 .enter()
                 .append("rect")
                     .attr("x", function(d){return d.x;})
-                //.attr("y", function(d){return y(d.y+d.y0);})
-                .attr("y", height)
-                .attr("width", x.rangeBand())
-                //.attr("height", function(d,i){return height - y(d.y);})
-                .attr("height", 0)
-                .style("fill", function(d,i){return color(d.fruitName);});
+                    .attr("y", height)
+                    .attr("width", x.rangeBand())
+                    .attr("height", 0)
+                    .style("fill", function(d,i){return color(d.fruitName);});
 
+            // Animate in cascade each rectangle
             rect.transition()
                 .delay(function(d, i) { return i * 100; })
-                .attr("y", function(d){return y(d.y+d.y0);})
-                .attr("height", function(d,i){return height - y(d.y);});
+                .attr("y", function(d){return y(d.y + d.y0);})
+                .attr("height", function(d){ return height - y(d.y); });
 
+            // ======================
+            // Legend
+            // ======================
+
+            // Generate groups per each fruit label
             var legend = d3.select("svg").selectAll(".legend")
                 .data(color.domain().slice().reverse())
                 .enter()
                 .append("g")
                     .attr("class", "legend")
-                    .attr("transform", function(d,i){ return "translate(0," + i*20 + ")"; });
+                    .attr("transform", function(d,i){ return "translate(0," + i * 20 + ")"; });
 
+            // Draw a rectangle per each fruit
             legend.append("rect")
                 .attr("x", width + margin.left - 18)
                 .attr("width", 18)
                 .attr("height", 18)
                 .style("fill", color);
 
+            // Add labels
             legend.append("text")
                 .attr("x", width + margin.left - 24)
                 .attr("y", 9)
