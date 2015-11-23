@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <style>
+        svg {
+            background: #EEEEEE;
+        }
+        .link {
+            stroke: #ccc;
+        }
+        image {
+            mask: url(#masking);
+        }
+    </style>
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+</head>
+<body>
+<svg width="960" height="500">
+    <defs>
+        <mask id="masking" maskUnits="objectBoundingBox" maskContentUnits="objectBoundingBox">
+            <circle cx=".5" cy=".5" r=".5" fill="white"></circle>
+        </mask>
+    </defs>
+</svg>
+
+<script>
+
+    // ======================
+    // Variables
+    // ======================
+
+    var width = 960,
+        height = 500,
+        r = 60;
+
+    // ======================
+    // Layout
+    // ======================
+
+    // Select the SVG container
+    var svg = d3.select("svg");
+
+    // Setup the force layout
+    var force = d3.layout.force()
+            .gravity(.08)
+            .distance(function(d) { return d.value * 100; })
+            .charge(-300)
+            .size([width, height]);
+
+    // Get the JSON file with the data
+    d3.json("graph.json", function (error, json) {
+        if (error) throw error;
+
+        // Add nodes and links to the force layout
+        force
+                .nodes(json.nodes)
+                .links(json.links)
+                .start();
+
+                // ======================
+                // Nodes & Links
+                // ======================
+
+                // Draw links between nodes
+                var link = svg.selectAll(".link")
+                        .data(json.links)
+                        .enter().append("line")
+                        .attr("class", "link");
+
+                // Draw nodes
+                var node = svg.selectAll(".node")
+                        .data(json.nodes)
+                        .enter().append("g")
+                        .attr("class", "node")
+                        .call(force.drag);
+
+                // Draw images inside nodes
+                node.append("image")
+                        .attr("xlink:href", function(d) { return d.image; })
+                        .attr("x", -r/2)
+                        .attr("y", -r/2)
+                        .attr("width", r)
+                        .attr("height", r);
+                console.log(node);
+
+                // Add tick event handler, to movement
+                force.on("tick", function () {
+                    link
+                            .attr("x1", function (d) { return d.source.x; })
+                            .attr("y1", function (d) { return d.source.y; })
+                            .attr("x2", function (d) { return d.target.x; })
+                            .attr("y2", function (d) { return d.target.y; });
+
+                    node.attr("transform", function (d) {
+                        return "translate(" + d.x + "," + d.y + ")";
+                    });
+                    // Attach event listeners for each node
+                    node
+                            .on('mouseover', onNodeMouseOver)
+                            .on('mouseout', onNodeMouseOut);
+                });
+
+                // ======================
+                // Event Listeners
+                // ======================
+
+                // Handles the event of mouse over on each node.
+                function onNodeMouseOver() {
+                    d3.select(this)
+                            .select("image")
+                            .transition().duration(200)
+                            .attr("x", -(r + 10)/2)
+                            .attr("y", -(r + 10)/2)
+                            .attr("width", r + 10)
+                            .attr("height", r + 10)
+                            .transition().duration(1000).ease('elastic')
+                            .attr("x", -(r + 5)/2)
+                            .attr("y", -(r + 5)/2)
+                            .attr("width", r + 5)
+                            .attr("height", r + 5);
+                }
+
+                // Handles the event of mouse out on each node.
+                function onNodeMouseOut() {
+                    d3.select(this)
+                            .select("image")
+                            .transition().duration(200)
+                            .attr("x", -r/2)
+                            .attr("y", -r/2)
+                            .attr("width", r)
+                            .attr("height", r);
+                }
+            }
+    );
+
+
+</script>
+
+</body>
+</html>

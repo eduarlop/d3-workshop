@@ -1,0 +1,135 @@
+{
+    "nodes": [
+        {
+            "name": "Champions",
+            "image": "https://pbs.twimg.com/profile_images/616969183948054528/mF1Oxcly.jpg"
+        },
+        {
+            "name": "Barcelona",
+            "image": "https://pbs.twimg.com/profile_images/562256716461379584/YtGF5lKF.jpeg"
+        },
+        {
+            "name": "Real Madrid",
+            "image": "https://pbs.twimg.com/profile_images/2482198530/iql2hfa8kks5q78q4ag3.jpeg"
+        },
+        {
+            "name": "Atlético de Madrid",
+            "image": "https://pbs.twimg.com/profile_images/557491322353758208/_Ts7dWBx.png"
+        },
+        {
+            "name": "Manchester United",
+            "image": "https://pbs.twimg.com/profile_images/570621930982477824/pDfJe14Y.jpeg"
+        },
+        {
+            "name": "Chelsea",
+            "image": "https://pbs.twimg.com/profile_images/665156514945089536/W9sPlZWS.jpg"
+        },
+        {
+            "name": "Arsenal",
+            "image": "https://pbs.twimg.com/profile_images/663653377017061376/C8hg9fpl.jpg"
+        },
+        {
+            "name": "Bayern Munchen",
+            "image": "https://pbs.twimg.com/profile_images/555309533677879296/Wc-ZSHk8.png"
+        },
+        {
+            "name": "Juventus",
+            "image": "https://pbs.twimg.com/profile_images/516503320328806400/Cztwl7_t.png"
+        },
+        {
+            "name": "AC Milan",
+            "image": "https://pbs.twimg.com/profile_images/491208808924856320/Yq_TX3H8.jpeg"
+        },
+        {
+            "name": "Paris Saint-Germain",
+            "image": "https://pbs.twimg.com/profile_images/2392476042/Paris_Saint-Germain_FC.png"
+        }
+    ],
+    "links": [
+        {
+            "source": 1,
+            "target": 0,
+            "value": 2
+        },
+        {
+            "source": 1,
+            "target": 2,
+            "value": 1
+        },
+        {
+            "source": 1,
+            "target": 3,
+            "value": 1
+        },
+        {
+            "source": 2,
+            "target": 0,
+            "value": 2
+        },
+        {
+            "source": 3,
+            "target": 0,
+            "value": 2
+        },
+        {
+            "source": 3,
+            "target": 2,
+            "value": 1
+        },
+        {
+            "source": 4,
+            "target": 0,
+            "value": 2
+        },
+        {
+            "source": 4,
+            "target": 5,
+            "value": 1
+        },
+        {
+            "source": 4,
+            "target": 6,
+            "value": 1
+        },
+        {
+            "source": 5,
+            "target": 0,
+            "value": 2
+        },
+        {
+            "source": 5,
+            "target": 6,
+            "value": 1
+        },
+        {
+            "source": 6,
+            "target": 0,
+            "value": 2
+        },
+        {
+            "source": 7,
+            "target": 0,
+            "value": 2
+        },
+        {
+            "source": 8,
+            "target": 0,
+            "value": 2
+        },
+        {
+            "source": 8,
+            "target": 9,
+            "value": 1
+        },
+        {
+            "source": 9,
+            "target": 0,
+            "value": 2
+        },
+        {
+            "source": 10,
+            "target": 0,
+            "value": 2
+        }
+    ]
+}
