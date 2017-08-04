@@ -17,16 +17,16 @@ import (
 //				and other HyperLedger functions)
 //==============================================================================================================================
 type  SimpleChaincode struct {
-}
+}		
 
 //==============================================================================================================================
 //	Account - Defines the structure for an account object. JSON on right tells it what JSON fields to map to
 //			  that element when reading a JSON object into the struct e.g. JSON currency -> Struct Currency
 //==============================================================================================================================
 type Account struct{
-	AccountNo string `json:"accountno"`
+	AccountNo string `json:"accountno"`	
 	LegalEntity string `json:"legalentity"`
-	Currency string `json:"currency"`
+	Currency string `json:"currency"`				
 	Balance string `json:"balance"`
 }
 
@@ -60,18 +60,18 @@ func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface, function string
 	}
 
 	// Write the state to the ledger, test the network
-	err = stub.PutState("test_key", []byte(strconv.Itoa(Aval)))
+	err = stub.PutState("test_key", []byte(strconv.Itoa(Aval)))	
 	if err != nil {
 		return nil, err
 	}
-
+	
 	var empty []string
 	jsonAsBytes, _ := json.Marshal(empty)								//marshal an emtpy array of strings to clear the account index
 	err = stub.PutState(accountIndexStr, jsonAsBytes)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	return nil, nil
 }
 
@@ -84,17 +84,35 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function stri
 	// Handle different functions
 	if function == "init" {										//initialize the chaincode state, used as reset
 		return t.Init(stub, "init", args)
-	} else if function == "delete" {
-		return t.Delete(stub, args)
-	} else if function == "write" {
+	} else if function == "delete" {									
+		return t.Delete(stub, args)												
+	} else if function == "write" {									
 		return t.Write(stub, args)
-	} else if function == "init_account" {
+	} else if function == "init_account" {									
 		return t.init_account(stub, args)
-	} else if function == "transfer_balance" {
-		return t.transfer_balance(stub, args)
+	} else if function == "transfer_balance" {									
+		return t.transfer_balance(stub, args)										
+	} else if function == "reset" {
+		return t.reset(stub)
 	}
 
 	return nil, errors.New("Received unknown function invocation: " + function)
+}
+
+// ============================================================================================================================
+// Reset Function - Reset the chaincode
+// ============================================================================================================================
+func (t *SimpleChaincode) reset(stub shim.ChaincodeStubInterface) ([]byte, error) {
+	var err error
+	
+	var empty []string
+	jsonAsBytes, _ := json.Marshal(empty)								//marshal an emtpy array of strings to clear the account index
+	err = stub.PutState(accountIndexStr, jsonAsBytes)
+	if err != nil {
+		return nil, err
+	}
+	
+	return nil, nil
 }
 
 // ============================================================================================================================
@@ -103,7 +121,7 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function stri
 // ============================================================================================================================
 func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
 
-	if function == "read" {
+	if function == "read" {												
 		return t.read(stub, args)
 	}
 	fmt.Println("query did not find func: " + function)						//error
@@ -123,13 +141,13 @@ func (t *SimpleChaincode) read(stub shim.ChaincodeStubInterface, args []string) 
 	}
 
 	name = args[0]
-	valAsbytes, err := stub.GetState(name)
+	valAsbytes, err := stub.GetState(name)	
 	if err != nil {
 		jsonResp = "{\"Error\":\"Failed to get state for " + name + "\"}"
 		return nil, errors.New(jsonResp)
 	}
 
-	return valAsbytes, nil
+	return valAsbytes, nil												
 }
 
 // ============================================================================================================================
@@ -139,7 +157,7 @@ func (t *SimpleChaincode) Delete(stub shim.ChaincodeStubInterface, args []string
 	if len(args) != 1 {
 		return nil, errors.New("Incorrect number of arguments. Expecting 1")
 	}
-
+	
 	name := args[0]
 	err := stub.DelState(name)													//remove the key from chaincode state
 	if err != nil {
@@ -152,8 +170,8 @@ func (t *SimpleChaincode) Delete(stub shim.ChaincodeStubInterface, args []string
 		return nil, errors.New("Failed to get account index")
 	}
 	var accountIndex []string
-	json.Unmarshal(accountsAsBytes, &accountIndex)
-
+	json.Unmarshal(accountsAsBytes, &accountIndex)						
+	
 	//remove account from index
 	for i,val := range accountIndex{
 		if val == name{															//find the correct account
@@ -170,16 +188,16 @@ func (t *SimpleChaincode) Delete(stub shim.ChaincodeStubInterface, args []string
 // Write - directly write a variable into chaincode world state
 // ============================================================================================================================
 func (t *SimpleChaincode) Write(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
-	var name, value string
+	var name, value string 
 	var err error
 
 	if len(args) != 2 {
 		return nil, errors.New("Incorrect number of arguments. Expecting 2. name of the variable and value to set")
 	}
 
-	name = args[0]
+	name = args[0]														
 	value = args[1]
-	err = stub.PutState(name, []byte(value))
+	err = stub.PutState(name, []byte(value))					
 	if err != nil {
 		return nil, err
 	}
@@ -233,29 +251,29 @@ func (t *SimpleChaincode) init_account(stub shim.ChaincodeStubInterface, args []
 	res := Account{}
 	json.Unmarshal(accountAsBytes, &res)
 	if res.AccountNo == accountNo{
-		return nil, errors.New("This account arleady exists")
+		return nil, errors.New("This account arleady exists")			
 	}
 	amountStr := strconv.FormatFloat(ammount, 'E', -1, 64)
 
-	//build the account json string
+	//build the account json string 
 	str := `{"accountno": "` + accountNo + `", "legalentity": "` + legalEntity + `", "currency": "` + currency + `", "balance": "` + amountStr + `"}`
-	err = stub.PutState(accountNo, []byte(str))
+	err = stub.PutState(accountNo, []byte(str))							
 	if err != nil {
 		return nil, err
 	}
-
+		
 	//get the account index
 	accountsAsBytes, err := stub.GetState(accountIndexStr)
 	if err != nil {
 		return nil, errors.New("Failed to get account index")
 	}
 	var accountIndex []string
-	json.Unmarshal(accountsAsBytes, &accountIndex)
-
-	//append the index
-	accountIndex = append(accountIndex, accountNo)
+	json.Unmarshal(accountsAsBytes, &accountIndex)							
+	
+	//append the index 
+	accountIndex = append(accountIndex, accountNo)	
 	jsonAsBytes, _ := json.Marshal(accountIndex)
-	err = stub.PutState(accountIndexStr, jsonAsBytes)
+	err = stub.PutState(accountIndexStr, jsonAsBytes)						
 
 	return nil, nil
 }
@@ -264,7 +282,7 @@ func (t *SimpleChaincode) init_account(stub shim.ChaincodeStubInterface, args []
 // Transfer Balance - Create a transaction between two accounts, transfer a certain amount of balance
 // ============================================================================================================================
 func (t *SimpleChaincode) transfer_balance(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
-
+	
 	//       0           1         2
 	// "accountA", "accountB", "100.20"
 
@@ -285,15 +303,15 @@ func (t *SimpleChaincode) transfer_balance(stub shim.ChaincodeStubInterface, arg
 		return nil, errors.New("Failed to get the first account")
 	}
 	resA := Account{}
-	json.Unmarshal(accountAAsBytes, &resA)
-
+	json.Unmarshal(accountAAsBytes, &resA)								
+	
 	accountBAsBytes, err := stub.GetState(args[1])
 	if err != nil {
 		return nil, errors.New("Failed to get the second account")
 	}
 	resB := Account{}
-	json.Unmarshal(accountBAsBytes, &resB)
-
+	json.Unmarshal(accountBAsBytes, &resB)											
+	
 	BalanceA,err := strconv.ParseFloat(resA.Balance, 64)
 	if err != nil {
 		return nil, err
@@ -317,16 +335,16 @@ func (t *SimpleChaincode) transfer_balance(stub shim.ChaincodeStubInterface, arg
 	resB.Balance = newAmountStrB
 
 	jsonAAsBytes, _ := json.Marshal(resA)
-	err = stub.PutState(args[0], jsonAAsBytes)
+	err = stub.PutState(args[0], jsonAAsBytes)								
 	if err != nil {
 		return nil, err
 	}
 
 	jsonBAsBytes, _ := json.Marshal(resB)
-	err = stub.PutState(args[1], jsonBAsBytes)
+	err = stub.PutState(args[1], jsonBAsBytes)								
 	if err != nil {
 		return nil, err
 	}
-
+	
 	return nil, nil
 }
